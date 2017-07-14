@@ -21,7 +21,8 @@ server.listen(port, process.env.OPENSHIFT_NODEJS_IP || process.env.IP || undefin
   console.log('Express server listening on %d, in %s mode', port, app.get('env'));
 });
 
-const items = require('./heroes.json');
+const orgItems = require('./heroes.json');
+var items = orgItems;
 
 app.get('/api/heroes', function(req, res) {
   res.status(200).json(items);
@@ -41,20 +42,46 @@ app.post('/api/heroes', function(req, res) {
   res.status(200).json();
 });
 
-app.put('/api/heroes', function(req, res) {
+app.put('/api/detail/:id', function(req, res) {
   let id = req.body.id;
-  let issue = req.body.issue;
-  items[id] = JSON.parse(name);
-  res.status(200).json();
-});
+  let name = req.body.name;
+  
+  // for文で使う
+  var num;
+  // リクエストのidを数値に変換
+  var req_num = parseInt(id); 
+  // 新しいJSON配列を格納していく
+  var newData = [];
+  // name を変更する際に使う
+  var tempData = [];
+  // リクエストのidよりおおきいidのデータを退避する
+  var stockData = [];
 
-app.put('/api/heroes/:id', function(req, res) {
-  let id = req.body.id;
-  // let issue = req.body.issue;
-  // let name = req.body.name;
-  // console.log('put id: ', id, 'name: ', name);
-  console.log(items, items[id], JSON.parse(name));
-  items[id] = JSON.parse(name);
+  for (var i=0; i<items.length; i++) {
+    // i番目のitemsのidを数値に変換
+    num = parseInt(items[i].id);
+    // リクエストのidより処理中のidが小さいときは、そのままnewDataへ
+    if (num < req_num) {
+      newData.push(items[i]);
+    // リクエストのid = 処理中のidのときは、name を更新しnewDataへ
+    } else if (num == req_num) {
+      var tempData = items.filter(function(item, index){
+        if (item.id == id) return true;
+      });
+      tempData[0].name = name;
+      newData.push(tempData[0]);
+    // リクエストのidより処理中のidが大きいときは、stockDataへ
+    } else {
+      stockData.push(items[i]);
+    }
+  }
+  
+  // stockDataをnewDataへ
+  for (var i=0; i<stockData.length; i++) {
+    newData.push(stockData[i]);
+  }
+  // items を newDataで更新する
+  items = newData;
   res.status(200).json();
 });
 

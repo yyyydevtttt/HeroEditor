@@ -12,6 +12,7 @@ export class HeroService {
   private headers = new Headers({'Content-Type': 'application/json'});
   
   private url = '/api/heroes';
+  private heroesUrl = '/api/detail';
   
   constructor(private http: Http) { }
 
@@ -31,7 +32,7 @@ export class HeroService {
   }
 
   update(hero: Hero): Promise<Hero> {
-    const url = `${this.url}/${hero.id}`;
+    const url = `${this.heroesUrl}/${hero.id}`;
     return this.http
       .put(url, JSON.stringify(hero), {headers: this.headers})
       .toPromise()
@@ -48,7 +49,7 @@ export class HeroService {
   }
 
   delete(id: number): Promise<void> {
-    const url = `${this.url}/${id}`;
+    const url = `${this.heroesUrl}/${id}`;
     return this.http.delete(url, {headers: this.headers})
     .toPromise()
     .then(() => null)
